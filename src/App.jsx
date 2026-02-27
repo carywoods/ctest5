@@ -1,17 +1,27 @@
 import { useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null
+import { supabase } from './lib/supabase'
+import { useAuth } from './context/AuthContext'
+import Login from './components/Login'
 
 function App() {
+  const { user, loading: authLoading, signOut } = useAuth()
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(false)
+
+  if (authLoading) {
+    return (
+      <div className="app">
+        <div className="loading-container">
+          <p>Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Login />
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -57,8 +67,18 @@ function App() {
       )}
 
       <header className="header">
-        <h1>Supabase Test App</h1>
-        <p className="subtitle">Insert records into test_records table</p>
+        <div className="header-content">
+          <div>
+            <h1>Supabase Test App</h1>
+            <p className="subtitle">Insert records into test_records table</p>
+          </div>
+          <div className="user-info">
+            <span className="user-email">{user.email}</span>
+            <button onClick={signOut} className="signout-button">
+              Sign Out
+            </button>
+          </div>
+        </div>
       </header>
 
       <main className="main">
